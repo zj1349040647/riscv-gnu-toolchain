@@ -9,6 +9,7 @@ GLIBC_SRCDIR := @with_glibc_src@
 MUSL_SRCDIR := @with_musl_src@
 LINUX_HEADERS_SRCDIR := @with_linux_headers_src@
 GDB_SRCDIR := @with_gdb_src@
+LLVM_SRCDIR := @with_llvm_src@
 
 SIM:=qemu
 
@@ -245,10 +246,57 @@ else
 GLIBC_SRC_GIT :=
 endif
 
+ifeq ($(findstring $(srcdir),$(LLVM_SRCDIR)),$(srcdir))
+LLVM_SRC_GIT := $(LLVM_SRCDIR)/.git
+else
+LLVM_SRC_GIT :=
+endif
+
 $(srcdir)/%/.git:
 	cd $(srcdir) && \
 	flock $(srcdir)/.git/config git submodule init $(dir $@) && \
 	flock $(srcdir)/.git/config git submodule update $(dir $@)
+
+#
+# LLVM
+#
+
+stamps/build-llvm: $(LLVM_SRCDIR) $(LLVM_SRC_GIT)
+
+stamps/build-llvm-linux:
+	rm -rf $@ $(notdir $@)
+	mkdir $(notdir $@)
+	cd $(notdir $@) && \
+	    cmake $(LLVM_SRCDIR)/llvm \
+	    -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) \
+	    -DCMAKE_BUILD_TYPE=Release \
+	    -DLLVM_TARGETS_TO_BUILD="host;RISCV" \
+	    -DLLVM_ENABLE_PROJECTS="clang;libcxx;libcxxabi;libunwind" \
+	    -DLLVM_INSTALL_TOOLCHAIN_ONLY=On \
+	    -DLLVM_DEFAULT_TARGET_TRIPLE="$(LINUX_TUPLE)" \
+	    -DDEFAULT_SYSROOT=../sysroot
+	$(MAKE) -C $(notdir $@)
+	$(MAKE) -C $(notdir $@) install
+	rm -rf $(INSTALL_DIR)/bin/$(LINUX_TUPLE)-clang
+	cd $(INSTALL_DIR)/bin && ln -s clang $(LINUX_TUPLE)-clang
+	mkdir -p $(dir $@) && touch $@
+
+stamps/build-llvm-newlib: stamps/build-llvm
+	rm -rf $@ $(notdir $@)
+	mkdir $(notdir $@)
+	cd $(notdir $@) && \
+	    cmake $(LLVM_SRCDIR)/llvm \
+	    -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) \
+	    -DCMAKE_BUILD_TYPE=Release \
+	    -DLLVM_TARGETS_TO_BUILD="host;RISCV" \
+	    -DLLVM_ENABLE_PROJECTS="clang;libcxx;libcxxabi;libunwind" \
+	    -DLLVM_INSTALL_TOOLCHAIN_ONLY=On \
+	    -DLLVM_DEFAULT_TARGET_TRIPLE="$(NEWLIB_TUPLE)" \
+	$(MAKE) -C $(notdir $@)
+	$(MAKE) -C $(notdir $@) install
+	rm -rf $(INSTALL_DIR)/bin/$(NEWLIB_TUPLE)-clang
+	cd $(INSTALL_DIR)/bin && ln -s clang $(NEWLIB_TUPLE)-clang
+	mkdir -p $(dir $@) && touch $@
 
 #
 # GLIBC

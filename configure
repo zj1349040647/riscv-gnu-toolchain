@@ -585,6 +585,7 @@ PACKAGE_URL=''
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 with_linux_headers_src
+with_llvm_src
 with_gdb_src
 with_musl_src
 with_glibc_src
@@ -667,6 +668,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_linux
+enable_llvm
 with_arch
 with_abi
 with_tune
@@ -686,6 +688,7 @@ with_newlib_src
 with_glibc_src
 with_musl_src
 with_gdb_src
+with_llvm_src
 with_linux_headers_src
 '
       ac_precious_vars='build_alias
@@ -1318,6 +1321,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-linux          set linux as the default make target
                           [--disable-linux]
+  --enable-llvm           Build llvm by default [--disable-llvm]
   --enable-multilib       build both RV32 and RV64 runtime libraries
                           [--disable-multilib]
   --enable-gcc-checking   Enable gcc internal checking, it will make gcc very
@@ -1352,6 +1356,7 @@ Optional Packages:
   --with-glibc-src        Set glibc source path, use builtin source by default
   --with-musl-src         Set musl source path, use builtin source by default
   --with-gdb-src          Set gdb source path, use builtin source by default
+  --with-llvm-src         Set llvm source path, use builtin source by default
   --with-linux-headers-src
                           Set linux-headers source path, use builtin source by
                           default
@@ -3260,13 +3265,33 @@ else
 fi
 
 
-if test "x$enable_linux" != xno; then :
+# Check whether --enable-llvm was given.
+if test "${enable_llvm+set}" = set; then :
+  enableval=$enable_llvm;
+else
+  enable_llvm=no
+
+fi
+
+
+if test "x$enable_llvm" != xno; then :
+  if test "x$enable_linux" != xno; then :
+  default_target="linux llvm-linux"
+
+else
+  default_target="newlib llvm-newlib"
+
+fi
+else
+  if test "x$enable_linux" != xno; then :
   default_target=linux
 
 else
   default_target=newlib
 
 fi
+fi
+
 
 
 # Check whether --with-arch was given.
@@ -3613,6 +3638,25 @@ fi
 
 else
   with_gdb_src="\$(srcdir)/riscv-gdb"
+
+fi
+
+	}
+{
+
+# Check whether --with-llvm-src was given.
+if test "${with_llvm_src+set}" = set; then :
+  withval=$with_llvm_src;
+else
+  with_llvm_src=default
+
+fi
+
+	  if test "x$with_llvm_src" != xdefault; then :
+  with_llvm_src=$with_llvm_src
+
+else
+  with_llvm_src="\$(srcdir)/llvm-project"
 
 fi
 

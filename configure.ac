@@ -46,9 +46,21 @@ AC_ARG_ENABLE(linux,
         [enable_linux=no]
         )
 
-AS_IF([test "x$enable_linux" != xno],
-	[AC_SUBST(default_target, linux)],
-	[AC_SUBST(default_target, newlib)])
+AC_ARG_ENABLE(llvm,
+        [AS_HELP_STRING([--enable-llvm],
+		[Build llvm by default @<:@--disable-llvm@:>@])],
+        [],
+        [enable_llvm=no]
+        )
+
+AS_IF([test "x$enable_llvm" != xno],
+      [AS_IF([test "x$enable_linux" != xno],
+	     [AC_SUBST(default_target, "linux llvm-linux")],
+	     [AC_SUBST(default_target, "newlib llvm-newlib")])],
+      [AS_IF([test "x$enable_linux" != xno],
+	     [AC_SUBST(default_target, linux)],
+	     [AC_SUBST(default_target, newlib)])])
+
 
 AC_ARG_WITH(arch,
 	[AS_HELP_STRING([--with-arch=rv64imafdc],
@@ -211,16 +223,17 @@ AC_DEFUN([AX_ARG_WITH_SRC],
 		)
 	  AS_IF([test "x$opt_name" != xdefault],
 		[AC_SUBST(opt_name,$opt_name)],
-		[AC_SUBST(opt_name,"\$(srcdir)/riscv-$1")])
+		[AC_SUBST(opt_name,"\$(srcdir)/$2")])
 	  m4_popdef([opt_name])
 	}])
 
-AX_ARG_WITH_SRC(gcc)
-AX_ARG_WITH_SRC(binutils)
-AX_ARG_WITH_SRC(newlib)
-AX_ARG_WITH_SRC(glibc)
-AX_ARG_WITH_SRC(musl)
-AX_ARG_WITH_SRC(gdb)
+AX_ARG_WITH_SRC(gcc, riscv-gcc)
+AX_ARG_WITH_SRC(binutils, riscv-binutils)
+AX_ARG_WITH_SRC(newlib, riscv-newlib)
+AX_ARG_WITH_SRC(glibc, riscv-glibc)
+AX_ARG_WITH_SRC(musl, riscv-musl)
+AX_ARG_WITH_SRC(gdb, riscv-gdb)
+AX_ARG_WITH_SRC(llvm, llvm-project)
 
 AC_ARG_WITH(linux-headers-src,
 	[AC_HELP_STRING([--with-linux-headers-src],
