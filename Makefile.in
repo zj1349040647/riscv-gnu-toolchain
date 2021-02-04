@@ -107,6 +107,8 @@ newlib: stamps/build-gdb-newlib
 linux: stamps/build-gdb-linux
 endif
 linux-native: stamps/build-gcc-linux-native
+llvm-linux: stamps/build-llvm-linux
+llvm-newlib: stamps/build-llvm-newlib
 
 .PHONY: build-binutils build-gdb build-gcc1 build-libc build-gcc2 build-qemu
 build-binutils: stamps/build-binutils-@default_target@
