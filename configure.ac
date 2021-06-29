@@ -19,6 +19,10 @@ AC_PATH_PROGS_FEATURE_CHECK([GSED], [gsed sed],
 	[AC_MSG_ERROR([GNU sed not found])])
 AC_SUBST([GSED], [$ac_cv_path_GSED])
 
+AC_PATH_PROGS([PYTHON], [python python3 python2],
+	[AC_MSG_ERROR([python not found])])
+AC_SUBST([PYTHON], [$ac_cv_path_PYTHON])
+
 need_gcc_external_libraries="no"
 AC_CHECK_LIB(gmp, __gmpz_init, ,
         [need_gcc_external_libraries="yes"])

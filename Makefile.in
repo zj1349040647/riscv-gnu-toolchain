@@ -37,6 +37,7 @@ SYSROOT := $(INSTALL_DIR)/sysroot
 SHELL := /bin/sh
 AWK := @GAWK@
 SED := @GSED@
+PYTHON := @PYTHON@
 PATH := $(INSTALL_DIR)/bin:$(PATH)
 
 # Check to see if we need wrapper scripts for awk/sed (which point to
@@ -293,7 +294,8 @@ stamps/build-gdb-linux: $(GDB_SRCDIR) $(GDB_SRC_GIT)
 		--disable-binutils \
 		--disable-ld \
 		--disable-gold \
-		--disable-gprof
+		--disable-gprof \
+		--with-python=$(PYTHON)
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
@@ -508,7 +510,8 @@ stamps/build-gdb-newlib: $(GDB_SRCDIR) $(GDB_SRC_GIT)
 		--disable-binutils \
 		--disable-ld \
 		--disable-gold \
-		--disable-gprof
+		--disable-gprof \
+		--with-python=$(PYTHON)
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
